@@ -1,4 +1,5 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
+from markupsafe import Markup
 
 app = Flask(__name__)
 
@@ -106,3 +107,8 @@ def profile():
 		return "Update profile"
 	if request.method == 'DELETE':
 		return "Delete profile"
+
+
+@app.get('/test/<name>')
+def test(name):
+	return render_template('index.html', name=name)
