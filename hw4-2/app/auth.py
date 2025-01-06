@@ -85,6 +85,7 @@ def login():
 	return render_template('auth/login.html')
 
 
+@login_required
 @bp.route('/logout')
 def logout():
 	session.clear()
