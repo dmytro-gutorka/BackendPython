@@ -1,17 +1,52 @@
-DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS pots;
-
-CREATE TABLE user (
+CREATE TABLE IF NOT EXISTS user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    photo TEXT
 );
 
-CREATE TABLE post (
+CREATE TABLE IF NOT EXISTS item(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    author_id INTEGER NOT NULL,
-    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    title TEXT NOT NULL,
-    body TEXT NOT NULL,
-    FOREIGN KEY (author_id) REFERENCES user (id)
+    name TEXT NOT NULL,
+    photo TEXT DEFAULT null,
+    price_per_hour REAL DEFAULT null NULL,
+    price_per_day REAL DEFAULT null NULL,
+    price_per_week REAL DEFAULT null NULL,
+    price_per_month REAL DEFAULT null NULL
+);
+
+CREATE TABLE IF NOT EXISTS contract (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    description TEXT NOT NULL,
+    start_date TEXT NOT NULL,
+    end_date TEXT NOT NULL,
+    contract_num Integer NOT NULL,
+    leaser_id INTEGER NOT NULL,
+    taker_id INTEGER NOT NULL,
+    item_id INTEGER NOT NULL,
+    FOREIGN KEY (leaser_id) REFERENCES user(id),
+    FOREIGN KEY (taker_id) REFERENCES user(id),
+    FOREIGN KEY (item_id) REFERENCES item(id)
+);
+
+CREATE TABLE IF NOT EXISTS feedback(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    from_user INTEGER NOT NULL,
+    to_user INTEGER NOT NULL,
+    description TEXT NOT NULL,
+    contract INTEGER NOT NULL,
+    FOREIGN KEY (from_user) REFERENCES user(id),
+    FOREIGN KEY (to_user) REFERENCES user(id),
+    FOREIGN KEY (contract) REFERENCES contract(id)
+
+);
+
+CREATE TABLE IF NOT EXISTS favourites(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    item_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (item_id) REFERENCES item(id)
 );
