@@ -19,7 +19,7 @@ def search():
 		return "Created product"
 
 
-@login_required
+
 @bp.route('/contracts', methods=['GET', 'POST'])
 def contracts_list():
 	db = get_db()
@@ -30,7 +30,6 @@ def contracts_list():
 		return "Created contract"
 
 
-@login_required
 @bp.route('/contracts/<int:contract_id>', methods=['GET', 'PUT', 'PATCH'])
 def contracts_detail(contract_id):
 	db = get_db()
@@ -41,13 +40,11 @@ def contracts_detail(contract_id):
 		return f"Created contract with id {contract_id}"
 
 
-@login_required
 @bp.post('/complain')
 def complain():
 	return "Create a complain"
 
 
-@login_required
 @bp.route('/items', methods=['GET', 'POST'])
 def items_list():
 	db = get_db()
@@ -79,7 +76,6 @@ def items_list():
 		return redirect(url_for('core.index'))
 
 
-@login_required
 @bp.route('/items/<int:item_id>', methods=['GET', 'DELETE'])
 def items_detail(item_id):
 	db = get_db()
@@ -90,7 +86,6 @@ def items_detail(item_id):
 		return f"Item {item_id} was deleted"
 
 
-@login_required
 @bp.get('/leasers')
 def leasers_list():
 	db = get_db()
@@ -98,7 +93,6 @@ def leasers_list():
 	return render_template('core/index.html', leaser_list=leaser_list)
 
 
-@login_required
 @bp.get('/leasers/<int:leaser_id>')
 def leasers_detail(leaser_id):
 	db = get_db()
@@ -106,7 +100,6 @@ def leasers_detail(leaser_id):
 	return render_template('core/index.html', leaser_detail=leaser_detail)
 
 
-@login_required
 @bp.route('/profile/<int:user_id>', methods=['GET', 'PUT', 'DELETE'])
 def profiles_detail(user_id):
 	if request.method == 'GET':
