@@ -1,7 +1,8 @@
 from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.db import get_db
-import functools
+from app.utils import login_required
+from app.utils import db_handler
 
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -14,20 +15,7 @@ def load_logged_in_user():
 	if user_id is None:
 		g.user = None
 	else:
-		g.user = get_db().execute(
-			'SELECT * FROM user WHERE id = ?', (user_id,)
-		)
-
-
-def login_required(view):
-	@functools.wraps(view)
-	def wrapper_view(*args, **kwargs):
-		if g.user is None:
-			return redirect(url_for('auth.login'))
-
-		return view(*args, **kwargs)
-
-	return wrapper_view
+		g.user = db_handler.select('user', {'id': user_id}).fetchone()
 
 
 @bp.route('/register', methods=['GET', 'POST'])
@@ -38,20 +26,15 @@ def register():
 		db = get_db()
 		error = None
 
+		query_result = db_handler.insert('user', {'username': username, 'password': generate_password_hash(password)})
+
 		if not username or not password:
 			error = 'Invalid username or password'
 
-		if error is None:
-			try:
-				db.execute(
-					"INSERT INTO user (username, password) VALUES (?, ?)",
-					(username, generate_password_hash(password)),
-				)
-				db.commit()
-			except db.IntegrityError:
-				error = 'Username already registered'
-			else:
-				return redirect(url_for('auth.login'))
+		if query_result is None:
+			return redirect(url_for('auth.login'))
+
+		error = query_result
 
 		flash(error)
 
@@ -63,22 +46,16 @@ def login():
 	if request.method == 'POST':
 		username = request.form['username']
 		password = request.form['password']
-		db = get_db()
 		error = None
+		user = db_handler.select('user', {'username': username}).fetchone()
 
-		user = db.execute(
-			'SELECT * FROM user WHERE username = ?', (username,)
-		).fetchone()
-
-		if user is None:
-			error = 'Incorrect username'
-		elif not check_password_hash(user['password'], password):
-			error = 'Incorrect password'
+		if user is None or not check_password_hash(user['password'], password):
+			error = 'Incorrect username or password'
 
 		if error is None:
 			session.clear()
 			session['user_id'] = user['id']
-			return redirect(url_for('index'))  # change index to another URL
+			return redirect(url_for('core.index'))  # change index to another URL
 
 		flash(error)
 

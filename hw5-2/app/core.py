@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.db import get_db
-from app.auth import login_required
+from app.utils import login_required
 import functools
 
 
@@ -17,7 +17,6 @@ def search():
 
 	if request.method == 'POST':
 		return "Created product"
-
 
 
 @bp.route('/contracts', methods=['GET', 'POST'])
