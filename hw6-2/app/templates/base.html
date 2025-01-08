@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %} basic {% endblock %}</title>
+</head>
+
+<body>
+
+    <nav>
+        <ul>
+        {% if g.user %}
+            <li><span> {{ g.user['username']|capitalize }}</span></li>
+            <li><a href="{{ url_for('auth.logout') }}"> Log Out</a></li>
+            {% else %}
+            <li><span>  Guest </span></li>
+            <li><a href="{{ url_for('auth.login') }}"> Log In</a></li>
+            <li><a href="{{ url_for('auth.register') }}"> Register</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <section class="content">
+      <header>
+        {% block header %}{% endblock %}
+      </header>
+      {% for message in get_flashed_messages() %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+      {% block content %}{% endblock %}
+    </section>
+
+
+</body>
+
+</html>
