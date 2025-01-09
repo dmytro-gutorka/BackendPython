@@ -1,50 +1,79 @@
-from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, text
-from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
-from typing import Optional, Annotated
-from datetime import datetime, timezone
-
 import enum
-
-pk = Annotated[int, mapped_column(primary_key=True)]
-created_at = Annotated[datetime, mapped_column(server_default=text("TIMEZONE('utc', now())"))]
-updated_at = Annotated[datetime, mapped_column(server_default=text("TIMEZONE('utc', now())"),
-                                               onupdate=datetime.now(timezone.utc))]
+from datetime import datetime
+from typing import List, Optional
+from sqlalchemy import String, ForeignKey, Enum, func
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
-
-	repr_col_numb = 3
-	repr_col_name = tuple()
-
-	def __repr__(self):
-		columns = [f"{col}={getattr(self, col)}" for inx, col in enumerate(self.__table__.columns.keys())
-		           if col in self.repr_col_name or self.repr_col_numb > inx]
-		return f"<{self.__class__.__name__}: {', '.join(columns)}>"
+	pass
 
 
-class Workload(enum.Enum):
-	parttime = "parttime"
-	fulltime = "fulltime"
+class ItemStatus(enum.Enum):
+	rented = 'rented'
+	maintenance = 'maintenance'
+	available = 'available'
+	on_hold = 'on_hold'
 
 
-class Workers(Base):
-	__tablename__ = 'workers'
-
-	repr_col_numb = 2
+class User(Base):
+	__tablename__ = 'user'
 
 	id: Mapped[int] = mapped_column(primary_key=True)
-	username: Mapped[str]
+	username: Mapped[str] = mapped_column(unique=True)
+	password: Mapped[str]
+	first_name: Mapped[str] = mapped_column(String(30))
+	last_name: Mapped[str] = mapped_column(String(30))
+	photo: Optional[str]
 
 
-class Resumes(Base):
-	__tablename__ = 'resumes'
+class Item(Base):
+	__tablename__ = 'item'
 
 	id: Mapped[int] = mapped_column(primary_key=True)
-	worker_id: Mapped[int] = mapped_column(ForeignKey('workers.id', ondelete='CASCADE'))
-	title: Mapped[str] = mapped_column(String(256))
-	compensation: Mapped[Optional[int]] # instead of Optional[int] also can be user "int | None" or mapped_column(nullable=True)
-	workload: Mapped[Workload]
-	created_at: Mapped[created_at]
-	updated_at: Mapped[updated_at]
+	name: Mapped[str] = mapped_column(String(50))
+	photo: Mapped[str]
+	status: [ItemStatus]
+	price_per_hour: Mapped[float]
+	price_per_day: Mapped[float]
+	price_per_week: Mapped[float]
+	price_per_month: Mapped[float]
+	owner_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
 
 
+class Contract(Base):
+	__tablename__ = 'contract'
+
+	id: Mapped[int] = mapped_column(primary_key=True)
+	description: Optional[str] = mapped_column(String(50), default='')
+	start_date: Mapped[datetime]
+	end_date: Mapped[datetime]
+	renter_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+	owner_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+	item_id: Mapped[int] = mapped_column(ForeignKey('item.id'))
+
+
+class Feedback(Base):
+	__tablename__ = 'feedback'
+
+	id: Mapped[int] = mapped_column(primary_key=True)
+	from_user: Mapped[int] = mapped_column(ForeignKey('user.id'))
+	to_user:  Mapped[int] = mapped_column(ForeignKey('user.id'))
+	contract: Mapped[int] = mapped_column(ForeignKey('contract.id'))
+	description: Mapped[str] = mapped_column(String(500))
+
+
+class Favourite(Base):
+	__tablename__ = 'favourite'
+
+	id: Mapped[int] = mapped_column(primary_key=True)
+	user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+	item_id: Mapped[int] = mapped_column(ForeignKey('item.id'))
+
+
+class SearchHistory(Base):
+	__tablename__ = 'search_history'
+
+	id: Mapped[int] = mapped_column(primary_key=True)
+	user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+	searched_at: Mapped[datetime] = mapped_column(insert_default=func.now())
