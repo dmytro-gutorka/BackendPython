@@ -1,10 +1,14 @@
 from flask import render_template, request
+from flask import Flask
 from models import *
 
 
-def register_router(app, db):
+app = Flask(__name__, template_folder='templates')
 
-	@app.route('/')
-	def index():
-		users = User.query.all()
-		return str(users)
+
+@app.route('/registration', methods=['GET', 'POST'])
+def registration_view():
+	if request.method == 'POST':
+		pass
+	else:
+		pass
