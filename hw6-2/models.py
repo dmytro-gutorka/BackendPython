@@ -46,7 +46,7 @@ class Item(db.Model):
 	owner_id: Mapped[int] = mapped_column(ForeignKey('user.id', ondelete='CASCADE'))
 
 	user: Mapped['User'] = relationship(back_populates='items')
-	contract: Mapped['Contract'] = relationship(back_populates='contract')
+	contract: Mapped[Optional['Contract']] = relationship(back_populates='item', uselist=True)
 
 
 class Contract(db.Model):
@@ -58,9 +58,9 @@ class Contract(db.Model):
 
 	renter_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
 	host_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
-	item_id: Mapped[int] = mapped_column(ForeignKey('item.id'))
+	item_id: Mapped[int] = mapped_column(ForeignKey('item.id'), unique=True)
 
-	item: Mapped['Item'] = relationship(back_populates='item')
+	item: Mapped['Item'] = relationship(back_populates='contract')
 
 
 class Feedback(db.Model):

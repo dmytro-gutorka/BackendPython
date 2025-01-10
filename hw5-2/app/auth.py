@@ -23,7 +23,6 @@ def register():
 	if request.method == 'POST':
 		username = request.form['username']
 		password = request.form['password']
-		db = get_db()
 		error = None
 
 		query_result = db_handler.insert('user', {'username': username, 'password': generate_password_hash(password)})
@@ -35,7 +34,6 @@ def register():
 			return redirect(url_for('auth.login'))
 
 		error = query_result
-
 		flash(error)
 
 	return render_template('auth/register.html')
