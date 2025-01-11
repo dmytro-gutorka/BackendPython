@@ -21,7 +21,6 @@ class ItemStatus(PyEnum):
 
 
 class User(db.Model):
-	__tablename__ = 'user'
 
 	username: Mapped[str] = mapped_column(unique=True)
 	password: Mapped[str]
