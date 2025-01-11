@@ -1,13 +1,6 @@
 {% extends 'base.html' %}
 
-
-
 {% block content %}
-    {% if g.user %}
-    <p>{{ g.user.username }}</p>
-        {% else %}
-        <p>Guest</p>
-    {% endif %}
 
 {% with messages = get_flashed_messages(with_categories=True) %}
     {% if messages %}

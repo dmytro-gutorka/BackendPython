@@ -1,15 +1,12 @@
-from flask import render_template, request, flash, url_for, redirect, session, g
-from flask import Flask
+from flask import render_template, request, flash, url_for, redirect, session, g, Blueprint
 from werkzeug.security import generate_password_hash, check_password_hash
-
-from models import db, User
-
-
-app = Flask(__name__, template_folder='templates')
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+from .models import db, User
 
 
-@app.before_request
+bp = Blueprint("auth", __name__, url_prefix="/auth")
+
+
+@bp.before_request
 def before_request():
 	user_id = session.get('user_id')
 	if user_id is None:
@@ -18,21 +15,22 @@ def before_request():
 		g.user = User.query.get(int(user_id))
 
 
-@app.route('/registration', methods=['GET', 'POST'])
+@bp.route('/registration', methods=['GET', 'POST'])
 def registration_view():
 	if request.method == 'POST':
 		form_data = request.form.to_dict()
 		hash_password = generate_password_hash(form_data['password'])
 		form_data['password'] = hash_password
 		new_user = User(**form_data)
+
 		db.session.add(new_user)
 		db.session.commit()
-		return redirect(url_for('index'))
+		return redirect(url_for('main.index'))
 	else:
 		return render_template('auth/registration.html')
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@bp.route('/login', methods=['GET', 'POST'])
 def login_view():
 	error = None
 	if request.method == 'POST':
@@ -44,13 +42,14 @@ def login_view():
 			session.clear()
 			session['user_id'] = user.id
 			flash('You\'re successfully logged in!')
-			return redirect(url_for('index'))
+			return redirect(url_for('main.index'))
 		else:
 			error = 'Incorrect username or password'
 
 	return render_template('auth/login.html', error=error)
 
 
-@app.route('/index')
-def index():
-	return render_template('main/index.html')
+@bp.route('/logout')
+def logout_view():
+	session.clear()
+	return redirect(url_for('main.index'))

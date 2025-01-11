@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List
 from enum import Enum as PyEnum
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, ForeignKey, func, Enum
+from sqlalchemy import String, ForeignKey, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
 
@@ -21,19 +21,18 @@ class ItemStatus(PyEnum):
 
 
 class User(db.Model):
-
 	username: Mapped[str] = mapped_column(unique=True)
 	password: Mapped[str]
 	first_name: Mapped[str] = mapped_column(String(30))
 	last_name: Mapped[str] = mapped_column(String(30))
+	phone_number: Mapped[str] = mapped_column(String(15), nullable=True)
+	birthday: Mapped[datetime] = mapped_column(String(15))
 	photo: Mapped[Optional[str]]
 
 	items: Mapped[List['Item']] = relationship(back_populates='user', cascade='all, delete')
 
 
 class Item(db.Model):
-	__tablename__ = 'item'
-
 	name: Mapped[str] = mapped_column(String(50))
 	description: Mapped[Optional[str]] = mapped_column(String(250), default='')
 	photo: Mapped[Optional[str]]  # Optional for now
@@ -49,8 +48,6 @@ class Item(db.Model):
 
 
 class Contract(db.Model):
-	__tablename__ = 'contract'
-
 	description: Mapped[Optional[str]] = mapped_column(String(50), default='')
 	start_date: Mapped[datetime]
 	end_date: Mapped[datetime]
@@ -63,8 +60,6 @@ class Contract(db.Model):
 
 
 class Feedback(db.Model):
-	__tablename__ = 'feedback'
-
 	contract: Mapped[int] = mapped_column(ForeignKey('contract.id'))
 	description: Mapped[str] = mapped_column(String(500))
 
@@ -73,8 +68,6 @@ class Feedback(db.Model):
 
 
 class Favourite(db.Model):
-	__tablename__ = 'favourite'
-
 	user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
 	item_id: Mapped[int] = mapped_column(ForeignKey('item.id'))
 

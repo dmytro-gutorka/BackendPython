@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %} {% endblock %}</title>
+</head>
+<body>
+
+{% block navbar %}
+    <nav>
+        <ul>
+        <a href="{{ url_for('main.index') }}"> Home</a>
+            {% if g.user %}
+                <a href="{{ url_for('auth.profile_view') }}"> Profile</a>
+                <a href="{{ url_for('auth.logout_view') }}"> Log out</a>
+            {% else %}
+                <a href="{{ url_for('auth.registration_view') }}"> Sign In</a>
+                <a href="{{ url_for('auth.login_view') }}"> Log In</a>
+            {% endif %}
+        </ul>
+    </nav>
+{% endblock %}
+
+{% block content %}
+{% endblock %}
+
+
+</body>
+</html>
