@@ -1,6 +1,9 @@
 from flask import render_template, request, flash, url_for, redirect, session, g, Blueprint
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from .models import db, User
+import os
+from . import UPLOAD_FOLDER
 
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -21,10 +24,16 @@ def registration_view():
 		form_data = request.form.to_dict()
 		hash_password = generate_password_hash(form_data['password'])
 		form_data['password'] = hash_password
-		new_user = User(**form_data)
 
+		file = request.files['file']
+		if file.filename != '':
+			file.save(os.path.join(UPLOAD_FOLDER, file.filename))
+			form_data['photo'] = secure_filename(file.filename)
+
+		new_user = User(**form_data)
 		db.session.add(new_user)
 		db.session.commit()
+
 		return redirect(url_for('main.index'))
 	else:
 		return render_template('auth/registration.html')

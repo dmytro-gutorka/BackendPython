@@ -11,7 +11,7 @@
         <ul>
         <a href="{{ url_for('main.index') }}"> Home</a>
             {% if g.user %}
-                <a href="{{ url_for('auth.profile_view') }}"> Profile</a>
+                <a href="{{ url_for('main.profile_view') }}"> Profile</a>
                 <a href="{{ url_for('auth.logout_view') }}"> Log out</a>
             {% else %}
                 <a href="{{ url_for('auth.registration_view') }}"> Sign In</a>

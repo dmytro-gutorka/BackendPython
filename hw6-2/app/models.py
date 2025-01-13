@@ -17,7 +17,7 @@ class ItemStatus(PyEnum):
 	RENTED = 'Rented'
 	MAINTENANCE = 'Maintenance'
 	AVAILABLE = 'Available'
-	ON_HOLD = 'On_hold'
+	ON_HOLD = 'On_Hold'
 
 
 class User(db.Model):

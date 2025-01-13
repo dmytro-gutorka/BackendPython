@@ -1,1 +1,17 @@
 {% extends 'base.html' %}
+
+{% block  content %}
+
+<ul>
+<li> {{ profile_data.username }}</li>
+<li> {{ profile_data.first_name }}</li>
+<li> {{ profile_data.last_name }}</li>
+<li> {{ profile_data.last_name }}</li>
+<li> {{ profile_data.phone_number }}</li>
+<li> {{ profile_data.birthday }}</li>
+<li> {{ profile_data.photo }}</li>
+</ul>
+        <img src="../../static/uploads/my_image.jpg" alt="">
+
+
+{% endblock %}
