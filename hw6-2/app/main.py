@@ -10,8 +10,13 @@ def allowed_file(filename):
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def download_file(filename):
-	return send_from_directory(UPLOAD_FOLDER, filename)
+@bp.before_request
+def before_request():
+	user_id = session.get('user_id')
+	if user_id is None:
+		g.user = None
+	else:
+		g.user = User.query.get(int(user_id))
 
 
 @bp.route('/index')
@@ -23,12 +28,28 @@ def index():
 def profile_view():
 	if request.method == 'GET':
 		profile_data = User.query.get(session.get('user_id'))
-		img = UPLOAD_FOLDER + '/' + profile_data.photo
-		return render_template('main/profile.html', profile_data=profile_data, img=img)
+		photo_name = profile_data.photo
+		return render_template('main/profile.html', profile_data=profile_data, photo_name=photo_name)
 	if request.method == 'PUT':
 		return "Update profile"
 	if request.method == 'DELETE':
 		return "Delete profile"
+
+	
+# @app.route('/items', methods=['GET', 'POST'])
+# def items_list():
+# 	if request.method == 'GET':
+# 		return "Items list"
+# 	if request.method == 'POST':
+# 		return "create items"
+#
+#
+# @app.route('/items/<int:item_id>', methods=['GET', 'DELETE'])
+# def items_detail(item_id):
+# 	if request.method == 'GET':
+# 		return f"Get item {item_id}"
+# 	if request.method == 'DELETE':
+# 		return f"Item {item_id} was deleted"
 
 
 # @app.route('/search', methods=['GET', 'POST'])
@@ -58,22 +79,7 @@ def profile_view():
 # @app.post('/complain')
 # def complain():
 # 	return "Create a complain"
-#
-#
-# @app.route('/items', methods=['GET', 'POST'])
-# def items_list():
-# 	if request.method == 'GET':
-# 		return "Items list"
-# 	if request.method == 'POST':
-# 		return "create items"
-#
-#
-# @app.route('/items/<int:item_id>', methods=['GET', 'DELETE'])
-# def items_detail(item_id):
-# 	if request.method == 'GET':
-# 		return f"Get item {item_id}"
-# 	if request.method == 'DELETE':
-# 		return f"Item {item_id} was deleted"
+
 #
 #
 # @app.route('/compare', methods=['GET', 'PUT', 'PATCH'])

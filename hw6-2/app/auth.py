@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 from .models import db, User
 import os
 from . import UPLOAD_FOLDER
+from .main import allowed_file
 
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -25,10 +26,12 @@ def registration_view():
 		hash_password = generate_password_hash(form_data['password'])
 		form_data['password'] = hash_password
 
-		file = request.files['file']
-		if file.filename != '':
-			file.save(os.path.join(UPLOAD_FOLDER, file.filename))
-			form_data['photo'] = secure_filename(file.filename)
+		file = request.files['photo']
+		if file.filename != '' and allowed_file(file.filename):
+			secured_filename = secure_filename(file.filename)
+			secured_filename_with_subdir = f'user_avatars/{secured_filename}'
+			form_data['photo'] = secured_filename_with_subdir
+			file.save(os.path.join(UPLOAD_FOLDER, secured_filename_with_subdir))
 
 		new_user = User(**form_data)
 		db.session.add(new_user)
