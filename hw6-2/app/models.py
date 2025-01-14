@@ -34,7 +34,7 @@ class User(db.Model):
 
 class Item(db.Model):
 	name: Mapped[str] = mapped_column(String(50))
-	description: Mapped[Optional[str]] = mapped_column(String(250), default='')
+	description: Mapped[Optional[str]] = mapped_column(String(250), default='No description yet')
 	photo: Mapped[Optional[str]]  # Optional for now
 	status: Mapped[ItemStatus] = mapped_column(Enum(ItemStatus), default=ItemStatus.AVAILABLE)
 	price_per_hour: Mapped[float]

@@ -1,6 +1,9 @@
+import os
+
 from flask import render_template, request, flash, url_for, redirect, session, g, Blueprint, send_from_directory
-from .models import db, User
+from .models import db, User, Item
 from . import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
+from werkzeug.utils import secure_filename
 
 
 bp = Blueprint("main", __name__)
@@ -35,21 +38,42 @@ def profile_view():
 	if request.method == 'DELETE':
 		return "Delete profile"
 
-	
-# @app.route('/items', methods=['GET', 'POST'])
-# def items_list():
-# 	if request.method == 'GET':
-# 		return "Items list"
-# 	if request.method == 'POST':
-# 		return "create items"
-#
-#
-# @app.route('/items/<int:item_id>', methods=['GET', 'DELETE'])
-# def items_detail(item_id):
-# 	if request.method == 'GET':
-# 		return f"Get item {item_id}"
-# 	if request.method == 'DELETE':
-# 		return f"Item {item_id} was deleted"
+
+@bp.route('/items', methods=['GET', 'POST', 'DELETE'])
+def items_list():
+	owner_id = session.get('user_id')
+
+	if request.method == 'DELETE':
+		item_id = request.form['item_id']
+		item = Item.query.get(int(item_id))
+		db.session.delete(item)
+		db.session.commit()
+
+	if request.method == 'POST':
+		form_data = request.form.to_dict()
+		form_data['owner_id'] = owner_id
+
+		file = request.files['photo']
+		if file.filename != '' and allowed_file(file.filename):
+			secured_filename_with_subdir = f'item_images/{secure_filename(file.filename)}'
+			form_data['photo'] = secured_filename_with_subdir
+			file.save(os.path.join(UPLOAD_FOLDER, secured_filename_with_subdir))
+
+		new_item = Item(**form_data)
+		db.session.add(new_item)
+		db.session.commit()
+
+	owner_items = Item.query.filter_by(owner_id=owner_id).all()
+
+	return render_template('main/items.html', owner_items=owner_items)
+
+
+@bp.route('/items/<int:item_id>', methods=['GET'])
+def items_detail(item_id):
+	if request.method == 'GET':
+		return f"Get item {item_id}"
+	if request.method == 'DELETE':
+		return f"Item {item_id} was deleted"
 
 
 # @app.route('/search', methods=['GET', 'POST'])

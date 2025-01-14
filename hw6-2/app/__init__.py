@@ -10,7 +10,6 @@ TEMPLATE_FOLDER = os.path.join(BASE_DIR, 'templates/')
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 
-
 def create_app():
 	app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=UPLOAD_FOLDER)
 	app.secret_key = '0000'
