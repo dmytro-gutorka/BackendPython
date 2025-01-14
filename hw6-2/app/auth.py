@@ -1,10 +1,10 @@
-from flask import render_template, request, flash, url_for, redirect, session, g, Blueprint
+from flask import render_template, request, flash, url_for, redirect, session, g, Blueprint, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from .models import db, User
-import os
-from . import UPLOAD_FOLDER
 from .main import allowed_file
+
+import os
 
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -31,15 +31,15 @@ def registration_view():
 			secured_filename = secure_filename(file.filename)
 			secured_filename_with_subdir = f'user_avatars/{secured_filename}'
 			form_data['photo'] = secured_filename_with_subdir
-			file.save(os.path.join(UPLOAD_FOLDER, secured_filename_with_subdir))
+			file.save(os.path.join(current_app.config['MEDIA_FOLDER'], secured_filename_with_subdir))
 
 		new_user = User(**form_data)
 		db.session.add(new_user)
 		db.session.commit()
 
 		return redirect(url_for('main.index'))
-	else:
-		return render_template('auth/registration.html')
+
+	return render_template('auth/registration.html')
 
 
 @bp.route('/login', methods=['GET', 'POST'])

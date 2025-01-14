@@ -8,28 +8,28 @@
         <input type="number" name="price_per_hour" placeholder="Item per hour" required>
         <input type="number" name="price_per_day" placeholder="Item per day" required>
         <input type="number" name="price_per_week" placeholder="Item per week" required>
-        <button type="submit" >Create item</button>
+        <button type="submit">Create item</button>
     </form>
 
 
     {% for owner_item in  owner_items %}
         <ul>
-            <li> {{ owner_item.name }} </li>
+            <li><a href="{{ url_for('main.item_detail_view', item_id=owner_item.id) }}"> {{ owner_item.name }} </a></li>
             <li> {{ owner_item.description }}</li>
             <li> {{ owner_item.photo }}</li>
             <li> {{ owner_item.status.value }}</li>
             <li> {{ owner_item.price_per_hour }}</li>
             <li> {{ owner_item.price_per_day }} </li>
             <li> {{ owner_item.price_per_week }}</li>
-
-            <form method="POST">
-                <input type="hidden" name="item_id" value={{ owner_item.id }}>
-                <button type="submit" value="">Delete item</button>
-            </form>
-
-
-
         </ul>
+        <a href="{{ url_for('main.item_detail_view', item_id=owner_item.id) }}"> Edit item </a>
+{##}
+{##}
+{#        <form action="{{ url_for('main.delete_item', item_id=owner_item.id ) }}" method="POST">#}
+{#            <button type="submit" name="delete_item">Delete item</button>#}
+{#        </form>#}
+
+
     {% endfor %}
 
 {% endblock %}

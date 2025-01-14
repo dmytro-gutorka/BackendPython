@@ -1,16 +1,15 @@
-import os
-
-from flask import render_template, request, flash, url_for, redirect, session, g, Blueprint, send_from_directory
+from flask import render_template, request, flash, url_for, redirect, session, g, Blueprint, send_from_directory, current_app
 from .models import db, User, Item
-from . import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
 from werkzeug.utils import secure_filename
+
+import os
 
 
 bp = Blueprint("main", __name__)
 
 
 def allowed_file(filename):
-	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config["ALLOWED_EXTENSIONS"]
 
 
 @bp.before_request
@@ -33,47 +32,82 @@ def profile_view():
 		profile_data = User.query.get(session.get('user_id'))
 		photo_name = profile_data.photo
 		return render_template('main/profile.html', profile_data=profile_data, photo_name=photo_name)
+
 	if request.method == 'PUT':
 		return "Update profile"
 	if request.method == 'DELETE':
 		return "Delete profile"
 
 
-@bp.route('/items', methods=['GET', 'POST', 'DELETE'])
-def items_list():
+@bp.route('/items', methods=['GET'])
+def item_list_view():
 	owner_id = session.get('user_id')
+	owner_items = Item.query.filter_by(owner_id=owner_id).all()
+	return render_template('main/item_list.html', owner_items=owner_items)
 
-	if request.method == 'DELETE':
-		item_id = request.form['item_id']
-		item = Item.query.get(int(item_id))
-		db.session.delete(item)
-		db.session.commit()
 
-	if request.method == 'POST':
+@bp.route('/items', methods=['POST'])
+def add_item():
+	owner_id = session.get('user_id')
+	form_data = request.form.to_dict()
+	form_data['owner_id'] = owner_id
+
+	file = request.files['photo']
+	if file.filename != '' and allowed_file(file.filename):
+		secured_filename_with_subdir = f'item_images/{secure_filename(file.filename)}'
+		form_data['photo'] = secured_filename_with_subdir
+		file.save(os.path.join(current_app.config['MEDIA_FOLDER'], secured_filename_with_subdir))
+
+	new_item = Item(**form_data)
+	db.session.add(new_item)
+	db.session.commit()
+
+	return redirect(url_for('main.item_list_view'))
+
+#
+# @bp.route('/items/<int:item_id>', methods=['POST'])
+# def delete_item(item_id):
+# 	owner_id = session.get('user_id')
+# 	item = Item.query.get_or_404(int(item_id))
+#
+# 	if item.owner_id == owner_id:
+# 		db.session.delete(item)
+# 		db.session.commit()
+#
+# 		return redirect(url_for('main.item_list_view'))
+#
+# 	return "Unauthorized", 403
+
+
+@bp.route('/items/<int:item_id>', methods=['GET'])
+def item_detail_view(item_id):
+	item = Item.query.get(item_id)
+	return render_template('main/item_detail.html', item=item)
+
+
+@bp.route('/items/<int:item_id>', methods=['POST'])
+def edit_item(item_id):
+	item = Item.query.get(item_id)
+	if item.owner_id == session.get('user_id'):
 		form_data = request.form.to_dict()
-		form_data['owner_id'] = owner_id
-
 		file = request.files['photo']
+
 		if file.filename != '' and allowed_file(file.filename):
 			secured_filename_with_subdir = f'item_images/{secure_filename(file.filename)}'
 			form_data['photo'] = secured_filename_with_subdir
-			file.save(os.path.join(UPLOAD_FOLDER, secured_filename_with_subdir))
+			file.save(os.path.join(current_app.config['MEDIA_FOLDER'], secured_filename_with_subdir))
 
+		
 		new_item = Item(**form_data)
 		db.session.add(new_item)
 		db.session.commit()
 
-	owner_items = Item.query.filter_by(owner_id=owner_id).all()
+		return redirect(url_for('main.item_list_view'))
 
-	return render_template('main/items.html', owner_items=owner_items)
+	return "Unauthorized", 403
 
 
-@bp.route('/items/<int:item_id>', methods=['GET'])
-def items_detail(item_id):
-	if request.method == 'GET':
-		return f"Get item {item_id}"
-	if request.method == 'DELETE':
-		return f"Item {item_id} was deleted"
+
 
 
 # @app.route('/search', methods=['GET', 'POST'])
