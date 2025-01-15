@@ -1,11 +1,12 @@
 from flask import render_template, request, flash, url_for, redirect, session, g, Blueprint, send_from_directory, current_app
 from .models import db, User, Item
 from werkzeug.utils import secure_filename
-
 import os
 
 
 bp = Blueprint("main", __name__)
+
+
 
 
 def allowed_file(filename):
@@ -30,8 +31,7 @@ def index():
 def profile_view():
 	if request.method == 'GET':
 		profile_data = User.query.get(session.get('user_id'))
-		photo_name = profile_data.photo
-		return render_template('main/profile.html', profile_data=profile_data, photo_name=photo_name)
+		return render_template('main/profile.html', profile_data=profile_data)
 
 	if request.method == 'PUT':
 		return "Update profile"
@@ -42,13 +42,14 @@ def profile_view():
 @bp.route('/items', methods=['GET'])
 def item_list_view():
 	owner_id = session.get('user_id')
-	owner_items = Item.query.filter_by(owner_id=owner_id).all()
+	owner_items = db.session.execute(db.select(Item).filter_by(owner_id=owner_id)).scalars()
+
 	return render_template('main/item_list.html', owner_items=owner_items)
 
 
 @bp.route('/items/<int:item_id>', methods=['GET'])
 def item_detail_view(item_id):
-	item = Item.query.get(item_id)
+	item = db.session.execute(db.select(Item).filter_by(id=item_id)).scalar()
 	return render_template('main/item_detail.html', item=item)
 
 
@@ -57,8 +58,8 @@ def add_item():
 	owner_id = session.get('user_id')
 	form_data = request.form.to_dict()
 	form_data['owner_id'] = owner_id
-
 	file = request.files['photo']
+
 	if file.filename != '' and allowed_file(file.filename):
 		secured_filename_with_subdir = f'item_images/{secure_filename(file.filename)}'
 		form_data['photo'] = secured_filename_with_subdir
@@ -73,9 +74,11 @@ def add_item():
 
 @bp.route('/items/<int:item_id>', methods=['POST'])
 def edit_item(item_id):
-	item = Item.query.get(item_id)
+	item = db.session.execute(db.select(Item).filter_by(id=item_id)).scalar()
+
 	if item.owner_id == session.get('user_id'):
 		form_data = request.form.to_dict()
+		form_data['owner_id'] = item.owner_id
 		file = request.files['photo']
 
 		if file.filename != '' and allowed_file(file.filename):
@@ -83,8 +86,7 @@ def edit_item(item_id):
 			form_data['photo'] = secured_filename_with_subdir
 			file.save(os.path.join(current_app.config['MEDIA_FOLDER'], secured_filename_with_subdir))
 
-		new_item = Item(**form_data)
-		db.session.add(new_item)
+		db.session.execute(db.update(Item).filter_by(id=item_id), form_data)
 		db.session.commit()
 
 		return redirect(url_for('main.item_list_view'))
@@ -104,8 +106,6 @@ def delete_item(item_id):
 		return redirect(url_for('main.item_list_view'))
 
 	return "Unauthorized", 403
-
-
 
 
 
@@ -137,7 +137,6 @@ def delete_item(item_id):
 # def complain():
 # 	return "Create a complaint"
 
-#
 #
 # @app.route('/compare', methods=['GET', 'PUT', 'PATCH'])
 # def compare():

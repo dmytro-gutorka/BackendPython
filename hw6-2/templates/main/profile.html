@@ -9,7 +9,7 @@
 <li> {{ profile_data.last_name }}</li>
 <li> {{ profile_data.phone_number }}</li>
 <li> {{ profile_data.birthday }}</li>
-<li>  <img src="{{url_for('static', filename=photo_name)}}" alt="image"> </li>
+<li>  <img src="{{url_for('static', filename=profile_data.photo)}}" alt="image"> </li>
 </ul>
 
 
