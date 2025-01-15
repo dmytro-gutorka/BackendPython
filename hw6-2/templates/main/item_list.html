@@ -23,13 +23,28 @@
             <li> {{ owner_item.price_per_week }}</li>
         </ul>
         <a href="{{ url_for('main.item_detail_view', item_id=owner_item.id) }}"> Edit item </a>
-{##}
-{##}
-{#        <form action="{{ url_for('main.delete_item', item_id=owner_item.id ) }}" method="POST">#}
-{#            <button type="submit" name="delete_item">Delete item</button>#}
-{#        </form>#}
 
 
     {% endfor %}
 
 {% endblock %}
+
+{##}
+{#<button onclick="deleteItem(123)">Delete</button>#}
+{##}
+{#<script>#}
+{#function deleteItem(itemId) {#}
+{#    fetch(`/delete-item/${itemId}`, {#}
+{#        method: 'DELETE'#}
+{#    })#}
+{#    .then(response => {#}
+{#        if (response.ok) {#}
+{#            alert("Item deleted successfully");#}
+{#            location.reload(); // Reload the page or navigate to another page#}
+{#        } else {#}
+{#            alert("Failed to delete item");#}
+{#        }#}
+{#    })#}
+{#    .catch(error => console.error('Error:', error));#}
+{#}#}
+{#</script>#}

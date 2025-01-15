@@ -46,6 +46,12 @@ def item_list_view():
 	return render_template('main/item_list.html', owner_items=owner_items)
 
 
+@bp.route('/items/<int:item_id>', methods=['GET'])
+def item_detail_view(item_id):
+	item = Item.query.get(item_id)
+	return render_template('main/item_detail.html', item=item)
+
+
 @bp.route('/items', methods=['POST'])
 def add_item():
 	owner_id = session.get('user_id')
@@ -64,26 +70,6 @@ def add_item():
 
 	return redirect(url_for('main.item_list_view'))
 
-#
-# @bp.route('/items/<int:item_id>', methods=['POST'])
-# def delete_item(item_id):
-# 	owner_id = session.get('user_id')
-# 	item = Item.query.get_or_404(int(item_id))
-#
-# 	if item.owner_id == owner_id:
-# 		db.session.delete(item)
-# 		db.session.commit()
-#
-# 		return redirect(url_for('main.item_list_view'))
-#
-# 	return "Unauthorized", 403
-
-
-@bp.route('/items/<int:item_id>', methods=['GET'])
-def item_detail_view(item_id):
-	item = Item.query.get(item_id)
-	return render_template('main/item_detail.html', item=item)
-
 
 @bp.route('/items/<int:item_id>', methods=['POST'])
 def edit_item(item_id):
@@ -97,9 +83,22 @@ def edit_item(item_id):
 			form_data['photo'] = secured_filename_with_subdir
 			file.save(os.path.join(current_app.config['MEDIA_FOLDER'], secured_filename_with_subdir))
 
-		
 		new_item = Item(**form_data)
 		db.session.add(new_item)
+		db.session.commit()
+
+		return redirect(url_for('main.item_list_view'))
+
+	return "Unauthorized", 403
+
+
+@bp.route('/items/<int:item_id>', methods=['POST'])
+def delete_item(item_id):
+	owner_id = session.get('user_id')
+	item = Item.query.get_or_404(int(item_id))
+
+	if item.owner_id == owner_id:
+		db.session.delete(item)
 		db.session.commit()
 
 		return redirect(url_for('main.item_list_view'))
@@ -136,7 +135,7 @@ def edit_item(item_id):
 #
 # @app.post('/complain')
 # def complain():
-# 	return "Create a complain"
+# 	return "Create a complaint"
 
 #
 #
