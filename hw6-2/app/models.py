@@ -80,3 +80,4 @@ class Favourite(db.Model):
 #   TODO-1: Store search history in sessions ?
 
 
+# TEST MERGE BRANCH 
