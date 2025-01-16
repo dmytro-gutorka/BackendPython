@@ -2,21 +2,16 @@
 
 {% block content %}
     <script>
-        function deleteItem(itemId, method) {
+        function deleteItem(itemId) {
             fetch(`/items/${itemId}`, {
-                method: `${method}`,
+                method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             })
                 .then(response => {
                     if (response.ok) {
-                        if (method === 'DELETE') {
-                            alert("Item deleted successfully!");
-                        }
-                        else {
-                            alert("Item updated successfully!");
-                        }
+                        alert("Item deleted successfully!");
                     } else {
                         alert("Failed");
                     }
@@ -25,7 +20,7 @@
         }
     </script>
 
-    <form action="{{ url_for('main.add_item') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ url_for('main.item_list_view') }}" method="POST" enctype="multipart/form-data">
         <input type="text" name="name" placeholder="Item Name" required>
         <input type="text" name="description" placeholder="Item Description" required>
         <input type="file" name="photo" placeholder="Item Photo">
@@ -39,6 +34,7 @@
     {% for item in items_by_owner %}
         <ul>
             <li> {{ item.id }}</li>
+            <li> {{ item.name }}</li>
             <li> {{ item.description }}</li>
             <li> {{ item.photo }}</li>
             <li> {{ item.status.value }}</li>
@@ -48,7 +44,11 @@
         </ul>
 
         <form>
-            <button type="button" onclick="deleteItem({{ item.id }}, 'DELETE')">Delete item</button>
+            <button type="button" onclick="deleteItem({{ item.id }})">Delete item</button>
+        </form>
+
+        <form action='{{ url_for('main.item_detail_view', item_id=item.id) }}'>
+            <button type="submit">Edit item</button>
         </form>
 
     {% endfor %}

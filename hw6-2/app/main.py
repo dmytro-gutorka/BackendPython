@@ -1,6 +1,6 @@
 from flask import render_template, request, flash, url_for, redirect, session, g, Blueprint, send_from_directory, \
 	current_app
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, update
 from .models import db, User, Item
 from werkzeug.utils import secure_filename
 import os
@@ -23,7 +23,7 @@ def index():
 @bp.route('/profile', methods=['GET', 'PUT', 'DELETE'])
 def profile_view():
 	if request.method == 'GET':
-		profile_data = db.session.execute(select(User).where(User.id == session.get('user_id')))
+		profile_data = db.session.execute(select(User).where(User.id == session.get('user_id'))).scalar()
 		return render_template('main/profile.html', profile_data=profile_data)
 
 	if request.method == 'PUT':
@@ -32,13 +32,9 @@ def profile_view():
 		return "Delete profile"
 
 
-@bp.route('/items', methods=['GET'])
+@bp.route('/items', methods=['GET', 'POST'])
 def item_list_view():
 	owner_id = session.get('user_id')
-
-	if request.method == 'GET':
-		items_by_owner = db.session.execute(select(Item).where(owner_id=owner_id)).scalars()
-		return render_template('main/item_list.html', items_by_owner=items_by_owner)
 
 	if request.method == 'POST':
 		form_data = request.form.to_dict()
@@ -56,22 +52,24 @@ def item_list_view():
 
 		return redirect(url_for('main.item_list_view'))
 
+	items_by_owner = db.session.execute(select(Item).where(Item.owner_id == owner_id)).scalars()
+	return render_template('main/item_list.html', items_by_owner=items_by_owner)
 
-@bp.route('/items/<int:item_id>', methods=['DELETE'])
+
+@bp.route('/items/<int:item_id>', methods=['DELETE', 'PUT', 'POST', 'GET'])
 def item_detail_view(item_id):
 	item = db.session.execute(select(Item).where(Item.id == item_id)).scalar()
 
 	if request.method == 'DELETE':
 		if session.get('user_id') == item.owner_id:
-			db.session.delete(item)
+			db.session.execute(delete(Item).where(Item.id == item_id))
 			db.session.commit()
 			return redirect(url_for('main.item_list_view')), 204
 
 		return 'Unauthorized', 403
 
-	if request.method == 'PUT':
+	if 'edit_item' in request.form.to_dict():
 		if session.get('user_id') == item.owner_id:
-
 			form_data = request.form.to_dict()
 			form_data['owner_id'] = item.owner_id
 			file = request.files['photo']
@@ -81,12 +79,14 @@ def item_detail_view(item_id):
 				form_data['photo'] = secured_filename_with_subdir
 				file.save(os.path.join(current_app.config['MEDIA_FOLDER'], secured_filename_with_subdir))
 
-			db.session.execute(db.update(Item).filter_by(id=item_id), form_data)
+			db.session.execute(update(Item).where(Item.id == item_id), form_data)
 			db.session.commit()
 
-			return redirect(url_for('main.item_list_view')), 204
+			return redirect(url_for('main.item_list_view'))
 
 		return 'Unauthorized', 403
+
+	return render_template('main/item_detail.html', item=item)
 
 # @app.route('/search', methods=['GET', 'POST'])
 # def search():
