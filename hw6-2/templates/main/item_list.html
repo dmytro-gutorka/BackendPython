@@ -1,9 +1,31 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <script>
+        function deleteItem(itemId, method) {
+            fetch(`/items/${itemId}`, {
+                method: `${method}`,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => {
+                    if (response.ok) {
+                        if (method === 'DELETE') {
+                            alert("Item deleted successfully!");
+                        }
+                        else {
+                            alert("Item updated successfully!");
+                        }
+                    } else {
+                        alert("Failed");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
 
-
-    <form method="POST" enctype="multipart/form-data">
+    <form action="{{ url_for('main.add_item') }}" method="POST" enctype="multipart/form-data">
         <input type="text" name="name" placeholder="Item Name" required>
         <input type="text" name="description" placeholder="Item Description" required>
         <input type="file" name="photo" placeholder="Item Photo">
@@ -14,23 +36,23 @@
     </form>
 
 
-    {% for owner_item in  owner_items %}
+    {% for item in items_by_owner %}
         <ul>
-            <li><a href="{{ url_for('main.item_detail_view', item_id=owner_item.id) }}"> {{ owner_item.name }} </a></li>
-            <li> {{ owner_item.description }}</li>
-            <li> {{ owner_item.photo }}</li>
-            <li> {{ owner_item.status.value }}</li>
-            <li> {{ owner_item.price_per_hour }}</li>
-            <li> {{ owner_item.price_per_day }} </li>
-            <li> {{ owner_item.price_per_week }}</li>
+            <li> {{ item.id }}</li>
+            <li> {{ item.description }}</li>
+            <li> {{ item.photo }}</li>
+            <li> {{ item.status.value }}</li>
+            <li> {{ item.price_per_hour }}</li>
+            <li> {{ item.price_per_day }} </li>
+            <li> {{ item.price_per_week }}</li>
         </ul>
-        <a href="{{ url_for('main.item_detail_view', item_id=owner_item.id) }}"> Edit item </a>
-                <form action="{{ url_for('main.delete_item', item_id=owner_item.id ) }}">
-                <button type="submit"> Delete </button>
-                </form>
 
+        <form>
+            <button type="button" onclick="deleteItem({{ item.id }}, 'DELETE')">Delete item</button>
+        </form>
 
     {% endfor %}
 
 {% endblock %}
+
 

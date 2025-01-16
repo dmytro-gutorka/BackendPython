@@ -1,25 +1,15 @@
-from flask import render_template, request, flash, url_for, redirect, session, g, Blueprint, send_from_directory, current_app
+from flask import render_template, request, flash, url_for, redirect, session, g, Blueprint, send_from_directory, \
+	current_app
+from sqlalchemy import select, delete
 from .models import db, User, Item
 from werkzeug.utils import secure_filename
 import os
 
-
 bp = Blueprint("main", __name__)
-
-
 
 
 def allowed_file(filename):
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config["ALLOWED_EXTENSIONS"]
-
-
-@bp.before_request
-def before_request():
-	user_id = session.get('user_id')
-	if user_id is None:
-		g.user = None
-	else:
-		g.user = User.query.get(int(user_id))
 
 
 @bp.route('/index')
@@ -27,10 +17,13 @@ def index():
 	return render_template('main/index.html')
 
 
+# def save_object_in_db_with_file()
+
+
 @bp.route('/profile', methods=['GET', 'PUT', 'DELETE'])
 def profile_view():
 	if request.method == 'GET':
-		profile_data = User.query.get(session.get('user_id'))
+		profile_data = db.session.execute(select(User).where(User.id == session.get('user_id')))
 		return render_template('main/profile.html', profile_data=profile_data)
 
 	if request.method == 'PUT':
@@ -42,43 +35,14 @@ def profile_view():
 @bp.route('/items', methods=['GET'])
 def item_list_view():
 	owner_id = session.get('user_id')
-	owner_items = db.session.execute(db.select(Item).filter_by(owner_id=owner_id)).scalars()
 
-	return render_template('main/item_list.html', owner_items=owner_items)
+	if request.method == 'GET':
+		items_by_owner = db.session.execute(select(Item).where(owner_id=owner_id)).scalars()
+		return render_template('main/item_list.html', items_by_owner=items_by_owner)
 
-
-@bp.route('/items/<int:item_id>', methods=['GET'])
-def item_detail_view(item_id):
-	item = db.session.execute(db.select(Item).filter_by(id=item_id)).scalar()
-	return render_template('main/item_detail.html', item=item)
-
-
-@bp.route('/items', methods=['POST'])
-def add_item():
-	owner_id = session.get('user_id')
-	form_data = request.form.to_dict()
-	form_data['owner_id'] = owner_id
-	file = request.files['photo']
-
-	if file.filename != '' and allowed_file(file.filename):
-		secured_filename_with_subdir = f'item_images/{secure_filename(file.filename)}'
-		form_data['photo'] = secured_filename_with_subdir
-		file.save(os.path.join(current_app.config['MEDIA_FOLDER'], secured_filename_with_subdir))
-
-	new_item = Item(**form_data)
-	db.session.add(new_item)
-	db.session.commit()
-
-	return redirect(url_for('main.item_list_view'))
-
-
-@bp.route('/items/<int:item_id>', methods=['POST'])
-def edit_item(item_id):
-	item = db.session.execute(db.select(Item).filter_by(id=item_id)).scalar()
-
-	if item.owner_id == session.get('user_id'):
+	if request.method == 'POST':
 		form_data = request.form.to_dict()
-		form_data['owner_id'] = item.owner_id
+		form_data['owner_id'] = owner_id
 		file = request.files['photo']
 
 		if file.filename != '' and allowed_file(file.filename):
@@ -86,28 +50,43 @@ def edit_item(item_id):
 			form_data['photo'] = secured_filename_with_subdir
 			file.save(os.path.join(current_app.config['MEDIA_FOLDER'], secured_filename_with_subdir))
 
-		db.session.execute(db.update(Item).filter_by(id=item_id), form_data)
+		new_item = Item(**form_data)
+		db.session.add(new_item)
 		db.session.commit()
 
 		return redirect(url_for('main.item_list_view'))
 
-	return "Unauthorized", 403
 
+@bp.route('/items/<int:item_id>', methods=['DELETE'])
+def item_detail_view(item_id):
+	item = db.session.execute(select(Item).where(Item.id == item_id)).scalar()
 
-@bp.route('/items/<int:item_id>', methods=['POST'])
-def delete_item(item_id):
-	owner_id = session.get('user_id')
-	item = Item.query.get_or_404(int(item_id))
+	if request.method == 'DELETE':
+		if session.get('user_id') == item.owner_id:
+			db.session.delete(item)
+			db.session.commit()
+			return redirect(url_for('main.item_list_view')), 204
 
-	if item.owner_id == owner_id:
-		db.session.delete(item)
-		db.session.commit()
+		return 'Unauthorized', 403
 
-		return redirect(url_for('main.item_list_view'))
+	if request.method == 'PUT':
+		if session.get('user_id') == item.owner_id:
 
-	return "Unauthorized", 403
+			form_data = request.form.to_dict()
+			form_data['owner_id'] = item.owner_id
+			file = request.files['photo']
 
+			if file.filename != '' and allowed_file(file.filename):
+				secured_filename_with_subdir = f'item_images/{secure_filename(file.filename)}'
+				form_data['photo'] = secured_filename_with_subdir
+				file.save(os.path.join(current_app.config['MEDIA_FOLDER'], secured_filename_with_subdir))
 
+			db.session.execute(db.update(Item).filter_by(id=item_id), form_data)
+			db.session.commit()
+
+			return redirect(url_for('main.item_list_view')), 204
+
+		return 'Unauthorized', 403
 
 # @app.route('/search', methods=['GET', 'POST'])
 # def search():

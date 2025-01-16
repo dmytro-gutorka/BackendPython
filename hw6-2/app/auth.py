@@ -10,15 +10,6 @@ import os
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
-@bp.before_request
-def before_request():
-	user_id = session.get('user_id')
-	if user_id is None:
-		g.user = None
-	else:
-		g.user = User.query.get(int(user_id))
-
-
 @bp.route('/registration', methods=['GET', 'POST'])
 def registration_view():
 	if request.method == 'POST':

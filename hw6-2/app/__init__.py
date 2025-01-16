@@ -1,5 +1,5 @@
-from flask import Flask
-from app.models import db
+from flask import Flask, request, session, g
+from app.models import db, User
 from flask_migrate import Migrate
 from .settings import Settings
 
@@ -13,6 +13,14 @@ def create_app():
 
 	register_blueprints(app)
 	register_error_handlers(app)
+
+	@app.before_request
+	def handle_sessions():
+		user_id = session.get('user_id')
+		if user_id is None:
+			g.user = None
+		else:
+			g.user = User.query.get(int(user_id))
 
 	return app
 

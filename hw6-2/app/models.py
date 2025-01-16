@@ -21,6 +21,7 @@ class ItemStatus(PyEnum):
 
 
 class User(db.Model):
+	id: Mapped[int] = mapped_column(primary_key=True)
 	username: Mapped[str] = mapped_column(unique=True)
 	password: Mapped[str]
 	first_name: Mapped[str] = mapped_column(String(30))
@@ -33,6 +34,7 @@ class User(db.Model):
 
 
 class Item(db.Model):
+	id: Mapped[int] = mapped_column(primary_key=True)
 	name: Mapped[str] = mapped_column(String(50))
 	description: Mapped[Optional[str]] = mapped_column(String(250), default='No description yet')
 	photo: Mapped[Optional[str]]  # Optional for now
@@ -48,6 +50,7 @@ class Item(db.Model):
 
 
 class Contract(db.Model):
+	id: Mapped[int] = mapped_column(primary_key=True)
 	description: Mapped[Optional[str]] = mapped_column(String(50), default='')
 	start_date: Mapped[datetime]
 	end_date: Mapped[datetime]
@@ -60,6 +63,7 @@ class Contract(db.Model):
 
 
 class Feedback(db.Model):
+	id: Mapped[int] = mapped_column(primary_key=True)
 	contract: Mapped[int] = mapped_column(ForeignKey('contract.id'))
 	description: Mapped[str] = mapped_column(String(500))
 
@@ -68,6 +72,7 @@ class Feedback(db.Model):
 
 
 class Favourite(db.Model):
+	id: Mapped[int] = mapped_column(primary_key=True)
 	user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
 	item_id: Mapped[int] = mapped_column(ForeignKey('item.id'))
 
