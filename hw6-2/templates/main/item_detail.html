@@ -3,8 +3,6 @@
 {% block content %}
 
 
-
-
     <form action="{{ url_for('main.item_detail_view', item_id=item.id) }}" method="POST" enctype="multipart/form-data">
         <input type="text" name="name" value="{{ item.name }}" placeholder="Item Name" required>
         <input type="text" name="description" value="{{ item.description }}" placeholder="Item Description" required>
