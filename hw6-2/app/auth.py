@@ -1,6 +1,6 @@
-from flask import render_template, request, flash, url_for, redirect, session, g, Blueprint, current_app
+from flask import render_template, request, flash, url_for, redirect, session, Blueprint
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import db, User
+from .models import User
 from .main import save_object_with_file_in_db
 
 

@@ -8,4 +8,14 @@
         <li>{{ item.name }}</li>
     </ul>
 
+    <form action="{{ url_for('main.item_rent_view', item_id=item.id) }}" method="POST">
+        <input type="text" name="description" placeholder="Description" required>
+        <input type="date" name="start_date" placeholder="Start Date" required>
+        <input type="date" name="end_date" placeholder="End Date" required>
+        <input type="hidden" name="renter_id" value="{{ g.user.id }}">
+        <input type="hidden" name="host_id" value="{{ item.owner_id }}">
+        <input type="hidden" name="item_id" value="{{ item.id }}">
+        <input type="submit" value="Submit">
+    </form>
+
 {% endblock %}

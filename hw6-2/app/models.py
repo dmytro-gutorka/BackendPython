@@ -75,14 +75,3 @@ class Favourite(db.Model):
 	id: Mapped[int] = mapped_column(primary_key=True)
 	user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
 	item_id: Mapped[int] = mapped_column(ForeignKey('item.id'))
-
-
-# class SearchHistory(db.Model):
-# 	__tablename__ = 'search_history'
-#
-# 	user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
-# 	searched_at: Mapped[datetime] = mapped_column(insert_default=func.now())
-#   TODO-1: Store search history in sessions ?
-
-
-# TEST MERGE BRANCH 

@@ -49,14 +49,22 @@
             <li> {{ item.price_per_day }} </li>
             <li> {{ item.price_per_week }}</li>
         </ul>
+        
+        <button type="button" onclick="deleteItem({{ item.id }})">Delete item</button>
+        <button type="submit"><a href="{{ url_for('main.item_edit_view', item_id=item.id) }}">  Edit item </a> </button>
 
-        <form>
-            <button type="button" onclick="deleteItem({{ item.id }})">Delete item</button>
-        </form>
+        {% if g.user.id != item.owner_id %}
+                <button><a href="{{ url_for('main.item_rent_view', item_id=item.id) }}"> Rent item  </a> </button>
+        {% endif %}
 
-        <form action='{{ url_for('main.item_edit_view', item_id=item.id) }}'>
-            <button type="submit">Edit item</button>
+            {% if item.id not in in_favorite_list %}
+        <form action='{{ url_for('main.favourite_item_list_view')}}' method="POST">
+            <input type="hidden" name="item_id" value="{{ item.id }}">
+            <input type="hidden" name="user_id" value="{{ g.user.id }}">
+            <button type="submit">Add item to favourites</button>
         </form>
+        {% endif %}
+
 
     {% endfor %}
 

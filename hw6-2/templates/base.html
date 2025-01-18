@@ -19,15 +19,16 @@
 
 
 {% block navbar %}
-    <nav >
+    <nav>
         <ul>
         <a href="{{ url_for('main.index') }}"> Home</a>
             {% if g.user %}
                 <a href="{{ url_for('main.profile_view') }}"> Profile</a>
-                <a href="{{ url_for('auth.logout_view') }}"> Log out</a>
                 <a href="{{ url_for('main.item_list_view') }}">Items</a>
-                <a href="{{ url_for('main.leaser_list') }}">Leasers</a>
-
+                <a href="{{ url_for('main.leaser_list_view') }}">Leasers</a>
+                <a href="{{ url_for('main.favourite_item_list_view') }}">Favourite items</a>
+                <a href="{{ url_for('main.contract_list_view') }}"> Contracts </a>
+                <a href="{{ url_for('auth.logout_view') }}"> Log out</a>
             {% else %}
                 <a href="{{ url_for('auth.registration_view') }}"> Sign In</a>
                 <a href="{{ url_for('auth.login_view') }}"> Log In</a>

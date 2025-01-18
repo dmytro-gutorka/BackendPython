@@ -3,7 +3,7 @@
 {% block content %}
 
     {% for leaser in leasers %}
-        <h2><a href="{{ url_for('main.leaser_detail', leaser_id=leaser.id ) }}"> {{ leaser.username }} </a> </h2>
+        <h2><a href="{{ url_for('main.leaser_detail_view', leaser_id=leaser.id ) }}"> {{ leaser.username }} </a> </h2>
         <h3> Items: </h3>
 
             {% for item in leaser.items %}

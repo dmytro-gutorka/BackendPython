@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>My favourite items</h2>
+    {% for fav_item in favourite_items %}
+        <ul>
+        <li>{{ fav_item.name }}</li>
+        </ul>
+    {% endfor %}
+
+
+{% endblock %}

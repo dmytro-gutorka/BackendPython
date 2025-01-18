@@ -1,38 +1,19 @@
-from flask import render_template, request, url_for, redirect, session, Blueprint, current_app, flash
-from sqlalchemy import select, delete, update, insert
-from .models import db, User, Item
-from werkzeug.utils import secure_filename
-from sqlalchemy.orm import Bundle, selectinload
+from flask import render_template, request, url_for, redirect, session, Blueprint, flash
+from sqlalchemy import select, delete, insert
+from .models import db, User, Item, Favourite, Contract
+from sqlalchemy.orm import selectinload
+from .utils import save_object_with_file_in_db
+from datetime import datetime
 
-import os
 
 bp = Blueprint("main", __name__)
 
-
-def allowed_file(filename):
-	return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config["ALLOWED_EXTENSIONS"]
-
-
 # TODO: 2 - decorator for unauthorized users
+
 
 @bp.route('/index')
 def index():
 	return render_template('main/index.html')
-
-
-def save_object_with_file_in_db(form_data, file, class_model, obj_id=None, is_update=False):
-
-	if file.filename != '' and allowed_file(file.filename):
-		# if not os.exists -> os.mkdir
-		secured_filename_with_subdir = f'{class_model.__name__.lower()}_images/{secure_filename(file.filename)}'
-		form_data['photo'] = secured_filename_with_subdir
-		file.save(os.path.join(current_app.config['MEDIA_FOLDER'], secured_filename_with_subdir))
-
-	if is_update and obj_id is not None:
-		db.session.execute(update(class_model).where(class_model.id == obj_id).values(**form_data))
-	else:
-		db.session.execute(insert(class_model).values(**form_data))
-	db.session.commit()
 
 
 @bp.route('/profile', methods=['GET', 'PUT', 'DELETE'])
@@ -41,16 +22,10 @@ def profile_view():
 		profile_data = db.session.execute(select(User).where(User.id == session.get('user_id'))).scalar()
 		return render_template('main/profile.html', profile_data=profile_data)
 
-	if request.method == 'PUT':
-		return "Update profile"
-	if request.method == 'DELETE':
-		return "Delete profile"
-
 
 @bp.route('/items', methods=['GET', 'POST'])
 def item_list_view():
 	owner_id = session.get('user_id')
-	print(request.form.to_dict())
 
 	if request.method == 'POST':
 		form_data = request.form.to_dict()
@@ -60,8 +35,9 @@ def item_list_view():
 
 		return redirect(url_for('main.item_list_view'))
 
-	items_by_owner = db.session.execute(select(Item).where(Item.owner_id == owner_id)).scalars()
-	return render_template('main/item_list.html', items_by_owner=items_by_owner)
+	in_favorite_list = db.session.execute(select(Favourite.item_id).where(Favourite.user_id == session.get('user_id'))).scalars().all()
+	items_by_owner = db.session.execute(select(Item)).scalars()
+	return render_template('main/item_list.html', items_by_owner=items_by_owner, in_favorite_list=in_favorite_list)
 
 
 @bp.route('/items/<int:item_id>', methods=['DELETE', 'GET'])
@@ -100,8 +76,11 @@ def item_edit_view(item_id):
 	return render_template('main/item_detail_edit.html', item=item)
 
 
+#
+
+
 @bp.get('/leaser')
-def leaser_list():
+def leaser_list_view():
 	stmt = select(User).options(selectinload(User.items))
 	all_leasers_with_items = db.session.execute(stmt).scalars().all()
 
@@ -109,40 +88,67 @@ def leaser_list():
 
 
 @bp.get('/leaser/<int:leaser_id>')
-def leaser_detail(leaser_id):
+def leaser_detail_view(leaser_id):
 	stmt = select(User).where(User.id == leaser_id)
 	leaser = db.session.execute(stmt).scalars().first()
 
 	return render_template('main/leaser_detail.html', leaser=leaser)
 
 
-# @app.route('/search', methods=['GET', 'POST'])
-# def search():
-# 	if request.method == 'GET':
-# 		return "Get searched product"
-# 	if request.method == 'POST':
-# 		return "Created product"
-#
-#
-# @app.route('/contracts', methods=['GET', 'POST'])
-# def contracts_list():
-# 	if request.method == 'GET':
-# 		return "Get contract"
-# 	if request.method == 'POST':
-# 		return "Created contract"
-#
-#
-# @app.route('/contracts/<int:contract_id>', methods=['GET', 'PUT', 'PATCH'])
-# def contracts_detail(contract_id):
-# 	if request.method == 'GET':
-# 		return f"Get contract by {contract_id}"
-# 	if request.method == 'POST':
-# 		return f"Created contract with id {contract_id}"
-#
-#
+@bp.route('/favourite', methods=['GET', 'POST'])
+def favourite_item_list_view():
+	if request.method == 'POST':
+		form_data = request.form.to_dict()
+		stmt = insert(Favourite).values(**form_data)
+		db.session.execute(stmt)
+		db.session.commit()
+
+		return redirect(url_for('main.item_list_view'))
+
+	stmt = select(Item).where(Item.id.in_(
+		select(Favourite.item_id).where(Favourite.user_id == session.get('user_id'))))
+	favourite_items = db.session.execute(stmt).scalars().all()
+
+	return render_template('main/favourite_items.html', favourite_items=favourite_items)
+
+
+@bp.route('/contract', methods=['GET'])
+def contract_list_view():
+	if request.method == 'POST':
+		pass
+
+	return render_template('main/index.html')
+
+
+@bp.route('/items/<int:item_id>/rent', methods=['POST', 'GET'])
+def item_rent_view(item_id):
+	if request.method == 'POST':
+		form_data = request.form.to_dict()
+
+		print(form_data)
+		start_date = datetime.strptime(form_data['start_date'], '%Y-%m-%d')
+		end_date = datetime.strptime(form_data['end_date'], '%Y-%m-%d')
+
+		stmt = insert(Contract).values(description=form_data['description'], start_date=start_date
+		                               ,end_date=end_date, renter_id=int(form_data['renter_id']),
+		                               host_id=int(form_data['host_id']), item_id=int(form_data['item_id']))
+		db.session.execute(stmt)
+		db.session.commit()
+		flash('Your contract has been created.', 'success')
+
+		return redirect(url_for('main.index'))
+
+	return redirect(url_for('main.item_detail_view', item_id=item_id))
+
+
+@bp.route('/contract/<int:contract_id>', methods=['GET'])
+def contracts_detail_view(contract_id):
+	if request.method == 'GET':
+		return f"Get contract by {contract_id}"
+
+
+
 # @app.post('/complain')
 # def complain():
 # 	return "Create a complaint"
-
-#
 
