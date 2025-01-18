@@ -14,7 +14,7 @@ def registration_view():
 		hash_password = generate_password_hash(form_data['password'])
 		form_data['password'] = hash_password
 		file = request.files['photo']
-		save_object_with_file_in_db(file, form_data, User)
+		save_object_with_file_in_db(form_data, file, User)
 
 		return redirect(url_for('main.index'))
 

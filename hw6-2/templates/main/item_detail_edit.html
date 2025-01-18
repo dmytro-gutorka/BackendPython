@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+    <form action="{{ url_for('main.item_edit_view', item_id=item.id) }}" method="POST" enctype="multipart/form-data">
+        <input type="text" name="name" value="{{ item.name }}" placeholder="Item Name" required>
+        <input type="text" name="description" value="{{ item.description }}" placeholder="Item Description" required>
+        <input type="file" name="photo" placeholder="Item Photo">
+        <input type="number" value="{{ item.price_per_hour }}" name="price_per_hour" placeholder="Item per hour"
+               required>
+        <input type="number" value="{{ item.price_per_day }}" name="price_per_day" placeholder="Item per day" required>
+        <input type="number" value="{{ item.price_per_week }}" name="price_per_week" placeholder="Item per week"
+               required>
+        <input type="hidden" value="{{ item.owned_id }}" name="owner_id" required>
+
+        <input type="hidden" name="edit_item">
+        <button type="submit">Submit changes</button>
+
+    </form>
+
+
+{% endblock %}
+

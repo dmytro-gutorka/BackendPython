@@ -24,10 +24,16 @@
     <form action="{{ url_for('main.item_list_view') }}" method="POST" enctype="multipart/form-data">
         <input type="text" name="name" placeholder="Item Name" required>
         <input type="text" name="description" placeholder="Item Description" required>
-        <input type="file" name="photo" placeholder="Item Photo">
         <input type="number" name="price_per_hour" placeholder="Item per hour" required>
         <input type="number" name="price_per_day" placeholder="Item per day" required>
         <input type="number" name="price_per_week" placeholder="Item per week" required>
+                <input type="file" name="photo" placeholder="Item Photo">
+        <select name="status" id="">
+            <option value="AVAILABLE" name="status"> Available </option>
+            <option value="RENTED" name="status"> Rented </option>
+            <option value="MAINTENANCE" name="status"> Maintenance</option>
+        </select>
+
         <button type="submit">Create item</button>
     </form>
 
@@ -35,7 +41,7 @@
     {% for item in items_by_owner %}
         <ul>
             <li> {{ item.id }}</li>
-            <li> {{ item.name }}</li>
+            <li><a href="{{ url_for('main.item_detail_view', item_id=item.id) }}"> {{ item.name }} </a></li>
             <li> {{ item.description }}</li>
             <li> {{ item.photo }}</li>
             <li> {{ item.status.value }}</li>
@@ -48,7 +54,7 @@
             <button type="button" onclick="deleteItem({{ item.id }})">Delete item</button>
         </form>
 
-        <form action='{{ url_for('main.item_detail_view', item_id=item.id) }}'>
+        <form action='{{ url_for('main.item_edit_view', item_id=item.id) }}'>
             <button type="submit">Edit item</button>
         </form>
 

@@ -6,13 +6,28 @@
 </head>
 <body>
 
+
+{% block messages %}
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+{% endblock %}
+
+
 {% block navbar %}
-    <nav>
+    <nav >
         <ul>
         <a href="{{ url_for('main.index') }}"> Home</a>
             {% if g.user %}
                 <a href="{{ url_for('main.profile_view') }}"> Profile</a>
                 <a href="{{ url_for('auth.logout_view') }}"> Log out</a>
+                <a href="{{ url_for('main.item_list_view') }}">Items</a>
+                <a href="{{ url_for('main.leaser_list') }}">Leasers</a>
+
             {% else %}
                 <a href="{{ url_for('auth.registration_view') }}"> Sign In</a>
                 <a href="{{ url_for('auth.login_view') }}"> Log In</a>

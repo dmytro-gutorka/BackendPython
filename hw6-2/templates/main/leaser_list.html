@@ -1,18 +1,20 @@
 {% extends 'base.html' %}
 
+{% block content %}
 
-{##}
-{#{% block content %}#}
-{#    {% for leaser in leaser_list %}#}
-{#        {% for leaser in leaser_list %}#}
-{##}
-{#  <ul>#}
-{#  <li> {{  }}</li>#}
-{##}
-{#  </ul>#}
-{#    {% endfor %}#}
-{##}
-{##}
-{#    {% endfor %}#}
-{##}
-{#{% endblock %}#}
+    {% for leaser in leasers %}
+        <h2><a href="{{ url_for('main.leaser_detail', leaser_id=leaser.id ) }}"> {{ leaser.username }} </a> </h2>
+        <h3> Items: </h3>
+
+            {% for item in leaser.items %}
+                {% if item.status.value == 'Available' %}
+                    <ul>
+                        <li><a href="{{ url_for('main.item_detail_view', item_id=item.id) }}"> {{ item.name }}</a> </li>
+                        <li> {{ item.status.value }}</li>
+                    </ul>
+                {% endif %}
+            {% endfor %}
+
+    {% endfor %}
+
+{% endblock %}
