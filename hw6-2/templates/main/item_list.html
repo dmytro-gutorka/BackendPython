@@ -27,47 +27,69 @@
         <input type="number" name="price_per_hour" placeholder="Item per hour" required>
         <input type="number" name="price_per_day" placeholder="Item per day" required>
         <input type="number" name="price_per_week" placeholder="Item per week" required>
-                <input type="file" name="photo" placeholder="Item Photo">
+        <input type="file" name="photo" placeholder="Item Photo">
+
         <select name="status" id="">
-            <option value="AVAILABLE" name="status"> Available </option>
-            <option value="RENTED" name="status"> Rented </option>
+            <option value="AVAILABLE" name="status"> Available</option>
+            <option value="RENTED" name="status"> Rented</option>
             <option value="MAINTENANCE" name="status"> Maintenance</option>
         </select>
 
         <button type="submit">Create item</button>
     </form>
 
+    <h2>My items </h2>
 
-    {% for item in items_by_owner %}
-        <ul>
-            <li> {{ item.id }}</li>
-            <li><a href="{{ url_for('main.item_detail_view', item_id=item.id) }}"> {{ item.name }} </a></li>
-            <li> {{ item.description }}</li>
-            <li> {{ item.photo }}</li>
-            <li> {{ item.status.value }}</li>
-            <li> {{ item.price_per_hour }}</li>
-            <li> {{ item.price_per_day }} </li>
-            <li> {{ item.price_per_week }}</li>
-        </ul>
-        
-        <button type="button" onclick="deleteItem({{ item.id }})">Delete item</button>
-        <button type="submit"><a href="{{ url_for('main.item_edit_view', item_id=item.id) }}">  Edit item </a> </button>
 
-        {% if g.user.id != item.owner_id %}
-                <button><a href="{{ url_for('main.item_rent_view', item_id=item.id) }}"> Rent item  </a> </button>
+    {% for item in items %}
+        {% if item.owner_id == g.user.id %}
+
+            <ul>
+                <li> {{ item.id }}</li>
+                <li><a href="{{ url_for('main.item_detail_view', item_id=item.id) }}"> {{ item.name }} </a></li>
+                <li> {{ item.description }}</li>
+                <li> {{ item.photo }}</li>
+                <li> {{ item.status.value }}</li>
+                <li> {{ item.price_per_hour }}</li>
+                <li> {{ item.price_per_day }} </li>
+                <li> {{ item.price_per_week }}</li>
+            </ul>
+
+            <button type="button" onclick="deleteItem({{ item.id }})">Delete item</button>
+            <button type="submit"><a href="{{ url_for('main.item_edit_view', item_id=item.id) }}"> Edit item </a>
+            </button>
         {% endif %}
+    {% endfor %}
 
+    <br>
+    <br>
+
+
+    <h2>All items </h2>
+    {% for item in items %}
+        {% if item.owner_id != g.user.id %}
+            <ul>
+                <li> {{ item.id }}</li>
+                <li><a href="{{ url_for('main.item_detail_view', item_id=item.id) }}"> {{ item.name }} </a></li>
+                <li> {{ item.description }}</li>
+                <li> {{ item.photo }}</li>
+                <li> {{ item.status.value }}</li>
+                <li> {{ item.price_per_hour }}</li>
+                <li> {{ item.price_per_day }} </li>
+                <li> {{ item.price_per_week }}</li>
+            </ul>
             {% if item.id not in in_favorite_list %}
-        <form action='{{ url_for('main.favourite_item_list_view')}}' method="POST">
-            <input type="hidden" name="item_id" value="{{ item.id }}">
-            <input type="hidden" name="user_id" value="{{ g.user.id }}">
-            <button type="submit">Add item to favourites</button>
-        </form>
+                <form action='{{ url_for('main.favourite_item_list_view') }}' method="POST">
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <input type="hidden" name="user_id" value="{{ g.user.id }}">
+                    <button type="submit">Add item to favourites</button>
+                </form>
+            {% endif %}
+
+            <button><a href="{{ url_for('main.item_rent_view', item_id=item.id) }}"> Rent item </a></button>
+
         {% endif %}
-
-
     {% endfor %}
 
 {% endblock %}
-
 

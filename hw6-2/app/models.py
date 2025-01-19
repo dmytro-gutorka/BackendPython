@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List
 from enum import Enum as PyEnum
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, ForeignKey, Enum
+from sqlalchemy import String, ForeignKey, Enum, Date
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
 
@@ -37,7 +37,7 @@ class Item(db.Model):
 	id: Mapped[int] = mapped_column(primary_key=True)
 	name: Mapped[str] = mapped_column(String(50))
 	description: Mapped[Optional[str]] = mapped_column(String(250), default='No description yet')
-	photo: Mapped[Optional[str]]  # Optional for now
+	photo: Mapped[Optional[str]]
 	status: Mapped[ItemStatus] = mapped_column(Enum(ItemStatus), default=ItemStatus.AVAILABLE)
 	price_per_hour: Mapped[float]
 	price_per_day: Mapped[float]
@@ -52,8 +52,8 @@ class Item(db.Model):
 class Contract(db.Model):
 	id: Mapped[int] = mapped_column(primary_key=True)
 	description: Mapped[Optional[str]] = mapped_column(String(50), default='')
-	start_date: Mapped[datetime]
-	end_date: Mapped[datetime]
+	start_date: Mapped[datetime.date] = mapped_column(Date)
+	end_date: Mapped[datetime.date] = mapped_column(Date)
 
 	renter_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
 	host_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
