@@ -10,7 +10,7 @@ from .utils import login_required
 bp = Blueprint("main", __name__)
 
 
-@bp.route('/index')
+@bp.route('/')
 def index():
 	return render_template('main/index.html')
 

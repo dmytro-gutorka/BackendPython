@@ -1,4 +1,4 @@
-from flask import Flask, request, session, g
+from flask import Flask, session, g
 from app.models import db, User
 from flask_migrate import Migrate
 from .settings import Settings
