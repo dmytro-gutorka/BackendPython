@@ -1,18 +1,26 @@
 from flask_mail import Mail, Message
-from celery import shared_task
+from app import create_app
+from celery import Celery
 
+app = create_app()
 
-@shared_task
-def send_async_email(email_data):
+celery = Celery(app.name, broker=app.config["CELERY"]["broker_url"])
+celery.config_from_object(app.config["CELERY"])
+
+@celery.task
+def send_async_email():
     from flask import current_app
 
-    mail = Mail(current_app)
-    msg = Message(
-        email_data['subject'],
-        sender=current_app.config['MAIL_USERNAME'],
-        recipients=[email_data['to']],
-    )
-    msg.body = email_data['body']
+    with app.app_context():
 
-    with current_app.app_context():
+        mail = Mail(current_app)
+        mail.init_app(current_app)
+
+        msg = Message(
+            subject="Hello",
+            sender="dgutorka@gmail.com",
+            recipients=["to@example.com"],
+        )
+
+        msg.body = 'Test message'
         mail.send(msg)

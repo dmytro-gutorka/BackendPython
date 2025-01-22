@@ -6,6 +6,9 @@ from datetime import datetime
 from .utils import save_object_with_file_in_db, login_required
 from .models import db, User, Item, Favourite, Contract
 
+from flask_mail import Mail, Message
+
+
 bp = Blueprint("main", __name__)
 
 
@@ -148,15 +151,9 @@ def contract_list_view():
 
 @bp.route('/celery_test', methods=['GET'])
 def celery_test():
-	email_data = {
-		'subject': 'Hello from the other side!',
-		'to': 'dgutorka@gmail.com',
-		'body': 'Hey Paul, sending you this email from my Flask app, lmk if it works'
-	}
-
 	from .tasks import send_async_email
+	send_async_email.delay()
 
-	send_async_email.delay(email_data)
-	flash(f'Sending email to {email_data["to"]}')
 
+	flash(f'Sending email')
 	return redirect(url_for('main.index'))

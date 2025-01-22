@@ -28,7 +28,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: celery-worker
-    command: celery -A app.tasks worker --loglevel=INFO
+    command: celery -A app.tasks.celery worker --loglevel=INFO
     depends_on:
       - rabbitmq
     environment:

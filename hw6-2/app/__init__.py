@@ -15,6 +15,7 @@ def celery_init_app(app: Flask) -> Celery:
 	celery_app.config_from_object(app.config["CELERY"])
 	celery_app.set_default()
 	app.extensions["celery"] = celery_app
+
 	return celery_app
 
 
@@ -34,7 +35,6 @@ def create_app():
 	)
 	app.config.from_prefixed_env()
 	celery_init_app(app)
-
 
 	register_blueprints(app)
 	register_error_handlers(app)
