@@ -1,3 +1,5 @@
+import time
+
 from flask import render_template, request, url_for, redirect, session, Blueprint, flash
 from sqlalchemy import select, delete, insert
 from .models import db, User, Item, Favourite, Contract
@@ -5,7 +7,7 @@ from sqlalchemy.orm import selectinload
 from .utils import save_object_with_file_in_db
 from datetime import datetime
 from .utils import login_required
-
+from celery import shared_task
 
 bp = Blueprint("main", __name__)
 
@@ -36,7 +38,8 @@ def item_list_view():
 
 		return redirect(url_for('main.item_list_view'))
 
-	in_favorite_list = db.session.execute(select(Favourite.item_id).where(Favourite.user_id == session.get('user_id'))).scalars().all()
+	in_favorite_list = db.session.execute(
+		select(Favourite.item_id).where(Favourite.user_id == session.get('user_id'))).scalars().all()
 	items = db.session.execute(select(Item)).scalars().all()
 
 	return render_template('main/item_list.html', items=items, in_favorite_list=in_favorite_list)
@@ -144,4 +147,3 @@ def contract_list_view():
 	contracts = db.session.execute(stmt).scalars().all()
 
 	return render_template('main/contract_list.html', contracts=contracts)
-

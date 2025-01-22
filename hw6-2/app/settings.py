@@ -10,3 +10,6 @@ class Settings:
 	SECRET_KEY = os.getenv('SECRET_KEY', 'dev_secret_key')
 	SQLALCHEMY_DATABASE_URI = 'sqlite:///database.db'
 	MAX_CONTENT_LENGTH = 16 * 1000 * 1000
+
+	BROKER_URL = os.getenv("CELERY_BROKER_URL", "amqp://guest:guest@localhost:5672//")
+	RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "rpc://")

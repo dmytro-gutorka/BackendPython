@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+    {% for contract in contracts %}
+        <ul>
+            <li> {{ contract.description }}</li>
+            <li> {{ contract.start_date }}</li>
+            <li> {{ contract.end_date }}</li>
+        </ul>
+    {% endfor %}
+
+{% endblock %}
