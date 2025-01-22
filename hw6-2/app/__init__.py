@@ -1,6 +1,6 @@
 from flask import Flask, session, g
-from app.models import db, User
 from flask_migrate import Migrate
+from app.models import db, User
 from .settings import Settings
 from celery import Celery, Task
 
@@ -25,9 +25,6 @@ def create_app():
 	db.init_app(app)
 	Migrate(app, db)
 
-	register_blueprints(app)
-	register_error_handlers(app)
-
 	app.config.from_mapping(
 		CELERY=dict(
 			broker_url="amqp://guest:guest@localhost:5672//",
@@ -37,6 +34,10 @@ def create_app():
 	)
 	app.config.from_prefixed_env()
 	celery_init_app(app)
+
+
+	register_blueprints(app)
+	register_error_handlers(app)
 
 	@app.before_request
 	def handle_sessions():
