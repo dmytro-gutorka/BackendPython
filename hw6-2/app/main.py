@@ -97,6 +97,11 @@ def item_rent_view(item_id):
 		                               host_id=int(form_data['host_id']), item_id=int(form_data['item_id']))
 		db.session.execute(stmt)
 		db.session.commit()
+
+		from .tasks import send_async_email # for avoiding cycle import
+		recipient = db.session.execute(select(User.email).where(User.id == session.get('user_id'))).scalar()
+
+		send_async_email.delay(recipient)
 		flash('Your contract has been created.', 'success')
 
 		return redirect(url_for('main.index'))
@@ -149,11 +154,3 @@ def contract_list_view():
 	return render_template('main/contract_list.html', contracts=contracts)
 
 
-@bp.route('/celery_test', methods=['GET'])
-def celery_test():
-	from .tasks import send_async_email
-	send_async_email.delay()
-
-
-	flash(f'Sending email')
-	return redirect(url_for('main.index'))

@@ -24,6 +24,7 @@ class User(db.Model):
 	id: Mapped[int] = mapped_column(primary_key=True)
 	username: Mapped[str] = mapped_column(unique=True)
 	password: Mapped[str]
+	email: Mapped[str] = mapped_column(unique=True)
 	first_name: Mapped[str] = mapped_column(String(30))
 	last_name: Mapped[str] = mapped_column(String(30))
 	phone_number: Mapped[str] = mapped_column(String(15), nullable=True)

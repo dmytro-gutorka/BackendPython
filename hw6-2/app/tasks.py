@@ -7,8 +7,9 @@ app = create_app()
 celery = Celery(app.name, broker=app.config["CELERY"]["broker_url"])
 celery.config_from_object(app.config["CELERY"])
 
+
 @celery.task
-def send_async_email():
+def send_async_email(recipient):
     from flask import current_app
 
     with app.app_context():
@@ -19,8 +20,8 @@ def send_async_email():
         msg = Message(
             subject="Hello",
             sender="dgutorka@gmail.com",
-            recipients=["to@example.com"],
+            recipients=[recipient],
         )
 
-        msg.body = 'Test message'
+        msg.body = 'Your contract has been created'
         mail.send(msg)
