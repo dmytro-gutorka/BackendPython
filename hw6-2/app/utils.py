@@ -1,4 +1,4 @@
-from flask import current_app, session, redirect, url_for, g, flash
+from flask import current_app, session, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 from .models import db
 from sqlalchemy import update, insert

@@ -3,12 +3,26 @@
 
 {% block content %}
 
-    {% for contract in contracts %}
-        <ul>
-            <li> {{ contract.description }}</li>
-            <li> {{ contract.start_date }}</li>
-            <li> {{ contract.end_date }}</li>
-        </ul>
-    {% endfor %}
+    <p> Contracts where I'm an owner </p>
+        {% for contract in contracts %}
+             {% if g.user.id == contract.host_id %}
+                <ul>
+                    <li> {{ contract.description }}</li>
+                    <li> {{ contract.start_date }}</li>
+                    <li> {{ contract.end_date }}</li>
+                </ul>
+            {% endif %}
+        {% endfor %}
+
+    <p> Contracts where I'm a renter </p>
+        {% for contract in contracts %}
+            {% if g.user.id == contract.renter_id %}
+                <ul>
+                    <li> {{ contract.description }}</li>
+                    <li> {{ contract.start_date }}</li>
+                    <li> {{ contract.end_date }}</li>
+                </ul>
+            {% endif %}
+        {% endfor %}
 
 {% endblock %}

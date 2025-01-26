@@ -55,8 +55,10 @@
                 <li> {{ item.price_per_week }}</li>
             </ul>
 
+                      {% if item.status.value != 'Rented' %}
             <button type="button" onclick="deleteItem({{ item.id }})">Delete item</button>
             <button type="submit"><a href="{{ url_for('main.item_edit_view', item_id=item.id) }}"> Edit item </a>
+              {% endif %}
             </button>
         {% endif %}
     {% endfor %}
@@ -67,6 +69,7 @@
 
     <h2>All items </h2>
     {% for item in items %}
+        {% if item.status.value != 'Rented' %}
         {% if item.owner_id != g.user.id %}
             <ul>
                 <li> {{ item.id }}</li>
@@ -88,6 +91,7 @@
 
             <button><a href="{{ url_for('main.item_rent_view', item_id=item.id) }}"> Rent item </a></button>
 
+        {% endif %}
         {% endif %}
     {% endfor %}
 

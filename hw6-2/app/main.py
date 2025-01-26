@@ -1,12 +1,9 @@
 from flask import render_template, request, url_for, redirect, session, Blueprint, flash
-from sqlalchemy import select, delete, insert
+from sqlalchemy import select, delete, insert, or_
 from sqlalchemy.orm import selectinload
 from datetime import datetime
-
 from .utils import save_object_with_file_in_db, login_required
 from .models import db, User, Item, Favourite, Contract
-
-from flask_mail import Mail, Message
 
 
 bp = Blueprint("main", __name__)
@@ -148,7 +145,7 @@ def favourite_item_list_view():
 @bp.route('/contract', methods=['GET'])
 @login_required
 def contract_list_view():
-	stmt = select(Contract).where(Contract.renter_id == session.get('user_id'))
+	stmt = select(Contract).where(or_(Contract.renter_id == session.get('user_id'), Contract.host_id == session.get('user_id')))
 	contracts = db.session.execute(stmt).scalars().all()
 
 	return render_template('main/contract_list.html', contracts=contracts)
