@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trainer Details</title>
+</head>
+<body>
+    <h1>{{ trainer.username }}</h1>
+    <p>{{ trainer.trainer_profile.description }}</p>
+    <h2>Services</h2>
+    <ul>
+        {% for service in services %}
+            <li>{{ service.category.name }} - {{ service.price }} <a href="/booking/{{ trainer.id }}/{{ service.id }}/">Book</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Booking Details</title>
+</head>
+<body>
+    <h1>Booking Details</h1>
+    <p>Trainer: {{ booking.trainer.username }}</p>
+    <p>Service: {{ booking.service.category.name }}</p>
+    <p>Start: {{ booking.datetime_start }}</p>
+    <p>End: {{ booking.datetime_end }}</p>
+    <p>Status: {{ booking.status }}</p>
+</body>
+</html>
