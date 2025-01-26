@@ -1,22 +1,38 @@
 from datetime import datetime, timedelta, time
 from typing import List, Dict, Tuple
 
+# Определение типов для ясности
 Schedule = List[Dict[str, object]]
 Booking = Dict[str, object]
 
 
+# Оптимизированная функция
 def find_available_times(
 		trainer_schedule: Schedule,
 		bookings: List[Booking],
 		current_date: datetime.date,
 		service_durations: Dict[int, int]
 ) -> List[Tuple[time, time]]:
+	"""
+	Находит доступные интервалы времени на основании расписания и бронирований.
+
+	Args:
+		trainer_schedule: Список расписаний тренера.
+		bookings: Список бронирований.
+		current_date: Дата, для которой ищутся доступные интервалы.
+		service_durations: Словарь с длительностью услуг по их ID.
+
+	Returns:
+		Список доступных временных интервалов (начало, конец).
+	"""
+	# Извлечение интервалов расписания для текущей даты
 	schedule_intervals = [
 		(entry["start_time"], entry["end_time"])
 		for entry in trainer_schedule
 		if entry["date"] == current_date
 	]
 
+	# Создание списка интервалов бронирования
 	booking_intervals = []
 	for booking in bookings:
 		if booking["datetime_start"].date() == current_date:
@@ -27,6 +43,7 @@ def find_available_times(
 				(booking["datetime_start"] + duration).time()
 			))
 
+	# Сортировка интервалов бронирования по началу времени
 	booking_intervals.sort(key=lambda x: x[0])
 
 	# Поиск доступных интервалов
@@ -48,17 +65,18 @@ def find_available_times(
 	return available_intervals
 
 
+# Пример использования
 trainer_schedule = [
-	{"date": datetime(2025, 1, 5).date(), "start_time": time(9, 0), "end_time": time(17, 0)}
+	{"date": datetime(2025, 6, 15).date(), "start_time": time(7, 0), "end_time": time(20, 0)}
 ]
 bookings = [
-	{"datetime_start": datetime(2025, 1, 5, 11, 0), "service_id": 1},
-	{"datetime_start": datetime(2025, 1, 5, 14, 0), "service_id": 1},
-	{"datetime_start": datetime(2025, 1, 5, 16, 30), "service_id": 1}
+	{"datetime_start": datetime(2025, 6, 15, 8, 0), "service_id": 1},
+	{"datetime_start": datetime(2025, 6, 15, 12, 0), "service_id": 1},
+	{"datetime_start": datetime(2025, 6, 15, 18, 0), "service_id": 1}
 ]
-service_durations = {1: 60}
-current_date = datetime(2025, 1, 5).date()
+service_durations = {1: 120}
+current_date = datetime(2025, 6, 15).date()
 
-
+# Результат
 available_times = find_available_times(trainer_schedule, bookings, current_date, service_durations)
 print(available_times)
