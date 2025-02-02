@@ -1,10 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse, HttpResponseRedirect
-from django.urls import reverse
-from django.views import View
-from django import forms
 
 
 class Category(models.Model):
